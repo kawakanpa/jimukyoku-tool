@@ -2,6 +2,7 @@
 事務局ツール - Streamlit Webアプリ版
 社内LAN経由でブラウザからアクセスして使用する。
 """
+import calendar as _cal
 import os
 import sys
 import tempfile
@@ -33,6 +34,46 @@ COLUMN_CONFIG = {
 }
 
 EMPTY_COLUMNS = ["日付", "開始時刻", "終了時刻", "教室コード", "科目", "レベル", "講師名"]
+
+
+def _date_input_ja(label: str, key: str, default: date) -> date:
+    """カレンダー選択 + 年・月・日の数字入力（連動）。"""
+    y_key, m_key, d_key, p_key = f"{key}_y", f"{key}_m", f"{key}_d", f"{key}_p"
+
+    if y_key not in st.session_state:
+        st.session_state[y_key] = default.year
+        st.session_state[m_key] = default.month
+        st.session_state[d_key] = default.day
+
+    def _sync():
+        picked = st.session_state[p_key]
+        st.session_state[y_key] = picked.year
+        st.session_state[m_key] = picked.month
+        st.session_state[d_key] = picked.day
+
+    st.write(f"**{label}**")
+    y0 = int(st.session_state[y_key])
+    m0 = int(st.session_state[m_key])
+    d0 = min(int(st.session_state[d_key]), _cal.monthrange(y0, m0)[1])
+    st.date_input("", value=date(y0, m0, d0), key=p_key, on_change=_sync,
+                  label_visibility="collapsed", format="YYYY/MM/DD")
+
+    c1, c2, c3 = st.columns([3, 2, 2])
+    with c1:
+        st.number_input("年", 2020, 2035, step=1, key=y_key)
+    with c2:
+        st.number_input("月", 1, 12, step=1, key=m_key)
+    with c3:
+        max_d = _cal.monthrange(int(st.session_state[y_key]), int(st.session_state[m_key]))[1]
+        if int(st.session_state[d_key]) > max_d:
+            st.session_state[d_key] = max_d
+        st.number_input("日", 1, max_d, step=1, key=d_key)
+
+    return date(
+        int(st.session_state[y_key]),
+        int(st.session_state[m_key]),
+        min(int(st.session_state[d_key]), max_d),
+    )
 
 
 def _empty_df() -> pd.DataFrame:
@@ -199,9 +240,9 @@ def main():
         st.subheader("教室案内表を生成")
         c1, c2 = st.columns(2)
         with c1:
-            kyoshitu_start = st.date_input("開始日", value=date.today(), key="kyoshitu_start")
+            kyoshitu_start = _date_input_ja("開始日", "kyoshitu_start", date.today())
         with c2:
-            kyoshitu_end = st.date_input("終了日", value=date.today(), key="kyoshitu_end")
+            kyoshitu_end = _date_input_ja("終了日", "kyoshitu_end", date.today())
 
         if st.button("教室案内表を生成", type="primary", key="gen_kyoshitu"):
             if kyoshitu_start > kyoshitu_end:
@@ -230,9 +271,9 @@ def main():
         st.subheader("鳥瞰図を生成")
         c1, c2 = st.columns(2)
         with c1:
-            start_d = st.date_input("開始日", value=date.today(), key="start_d")
+            start_d = _date_input_ja("開始日", "kanzu_start", date.today())
         with c2:
-            end_d = st.date_input("終了日", value=date.today(), key="end_d")
+            end_d = _date_input_ja("終了日", "kanzu_end", date.today())
 
         if st.button("鳥瞰図を生成", type="primary", key="gen_kanzu"):
             if start_d > end_d:
