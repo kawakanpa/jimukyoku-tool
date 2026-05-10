@@ -43,7 +43,7 @@ def generate_kyoshitu(
     for i in range(days_count):
         current = start + timedelta(days=i)
         wd = WEEKDAY_JP[current.weekday()]
-        ws = wb.create_sheet(title=f"{current.month}/{current.day}({wd})")
+        ws = wb.create_sheet(title=f"{current.month}.{current.day}({wd})")
         _write_sheet(ws, current, wd, floor_rooms, slots_order, schedule,
                      current.year, current.month, current.day)
 
