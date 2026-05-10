@@ -83,9 +83,9 @@ def _df_to_records(df: pd.DataFrame) -> list[LessonRecord]:
     return records
 
 
-def _kyoshitu_bytes(schedule, settings, year: int, month: int) -> bytes:
+def _kyoshitu_bytes(schedule, settings, start: date, end: date) -> bytes:
     with tempfile.TemporaryDirectory() as tmp:
-        path = generate_kyoshitu(schedule, settings, year, month, tmp)
+        path = generate_kyoshitu(schedule, settings, start, end, tmp)
         with open(path, "rb") as f:
             return f.read()
 
@@ -199,27 +199,29 @@ def main():
         st.subheader("教室案内表を生成")
         c1, c2 = st.columns(2)
         with c1:
-            year = st.number_input("年", min_value=2020, max_value=2035,
-                                   value=date.today().year, step=1)
+            kyoshitu_start = st.date_input("開始日", value=date.today(), key="kyoshitu_start")
         with c2:
-            month = st.number_input("月", min_value=1, max_value=12,
-                                    value=date.today().month, step=1)
+            kyoshitu_end = st.date_input("終了日", value=date.today(), key="kyoshitu_end")
 
         if st.button("教室案内表を生成", type="primary", key="gen_kyoshitu"):
-            records = _df_to_records(st.session_state.df)
-            if not records:
-                st.warning("データがありません。先にCSVを取り込むか、データを入力してください。")
+            if kyoshitu_start > kyoshitu_end:
+                st.error("開始日が終了日より後になっています。")
             else:
-                with st.spinner("生成中..."):
-                    schedule = build_schedule(records, settings)
-                    data = _kyoshitu_bytes(schedule, settings, int(year), int(month))
-                fname = f"{int(year)}.{int(month)}月 教室案内表.xlsx"
-                st.download_button(
-                    label=f"📥 {fname} をダウンロード",
-                    data=data,
-                    file_name=fname,
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                )
+                records = _df_to_records(st.session_state.df)
+                if not records:
+                    st.warning("データがありません。先にCSVを取り込むか、データを入力してください。")
+                else:
+                    with st.spinner("生成中..."):
+                        schedule = build_schedule(records, settings)
+                        data = _kyoshitu_bytes(schedule, settings, kyoshitu_start, kyoshitu_end)
+                    label = f"{kyoshitu_start.strftime('%Y.%m.%d')}-{kyoshitu_end.strftime('%m.%d')}"
+                    fname = f"教室案内表_{label}.xlsx"
+                    st.download_button(
+                        label=f"📥 {fname} をダウンロード",
+                        data=data,
+                        file_name=fname,
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    )
 
     # ══════════════════════════════════════════
     # タブ③ 鳥瞰図

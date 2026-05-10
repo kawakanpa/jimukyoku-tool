@@ -1,11 +1,10 @@
 """
 教室案内表 Excel生成モジュール
-- 1日1シート、月ごとに1ファイル出力
+- 1日1シート、指定期間分を1ファイルに出力
 - シンプルな表形式
 """
-import calendar
 import os
-from datetime import date
+from datetime import date, timedelta
 from itertools import groupby
 
 import openpyxl
@@ -25,12 +24,12 @@ BORDER = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
 def generate_kyoshitu(
     schedule: ScheduleMap,
     settings: dict,
-    year: int,
-    month: int,
+    start_date: date,
+    end_date: date,
     output_dir: str,
 ) -> str:
     """
-    指定年月の教室案内表Excelを生成してパスを返す。
+    指定期間の教室案内表Excelを生成してパスを返す。
     """
     floor_rooms: dict = settings.get("floor_rooms", {"6階": [601, 602, 603]})
     slots_order: list[str] = settings.get("time_slots_order", [])
@@ -38,17 +37,16 @@ def generate_kyoshitu(
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
 
-    _, days_in_month = calendar.monthrange(year, month)
+    current = start_date
+    while current <= end_date:
+        wd = WEEKDAY_JP[current.weekday()]
+        ws = wb.create_sheet(title=f"{current.month}/{current.day}({wd})")
+        _write_sheet(ws, current, wd, floor_rooms, slots_order, schedule,
+                     current.year, current.month, current.day)
+        current += timedelta(days=1)
 
-    for day in range(1, days_in_month + 1):
-        d = date(year, month, day)
-        wd = WEEKDAY_JP[d.weekday()]
-        sheet_title = f"{month}月{day}日({wd})"
-        ws = wb.create_sheet(title=str(day))
-
-        _write_sheet(ws, d, wd, floor_rooms, slots_order, schedule, year, month, day)
-
-    filename = f"{year}.{month}月 教室案内表.xlsx"
+    label = f"{start_date.strftime('%Y.%m.%d')}-{end_date.strftime('%m.%d')}"
+    filename = f"教室案内表_{label}.xlsx"
     out_path = os.path.join(output_dir, filename)
     wb.save(out_path)
     return out_path
