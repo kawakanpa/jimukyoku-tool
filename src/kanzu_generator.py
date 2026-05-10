@@ -134,13 +134,6 @@ def _write_week_block(
 
     # ─── 時間帯行 ───
     for slot in slots_order:
-        # 当週にこのスロットが使われているか確認
-        has_data = any(
-            d in schedule and room in schedule[d] and slot in schedule[d][room]
-            for d in week_days for room in rooms
-        )
-        if not has_data:
-            continue
 
         cell = ws.cell(row, 1, slot)
         cell.fill = FILL_SLOTHDR

@@ -57,11 +57,7 @@ def generate_kyoshitu(
 def _write_sheet(ws, d, wd, floor_rooms, slots_order, schedule, year, month, day):
     day_schedule = schedule.get(d, {})
 
-    # --- 使用する時間帯のみに絞る ---
-    used_slots = set()
-    for room_slots in day_schedule.values():
-        used_slots.update(room_slots.keys())
-    display_slots = [s for s in slots_order if s in used_slots] or slots_order
+    display_slots = slots_order
 
     # === タイトル行 ===
     title = f"教室案内表　{year}年{month}月{day}日（{wd}）"
