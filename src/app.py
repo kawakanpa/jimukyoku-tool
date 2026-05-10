@@ -66,7 +66,7 @@ def _date_input_ja(label: str, key: str, default: date, sync_to: str = None) -> 
     y0 = int(st.session_state[y_key])
     m0 = int(st.session_state[m_key])
     d0 = min(int(st.session_state[d_key]), _cal.monthrange(y0, m0)[1])
-    st.date_input("", value=date(y0, m0, d0), key=p_key, on_change=_sync_calendar,
+    st.date_input("日付", value=date(y0, m0, d0), key=p_key, on_change=_sync_calendar,
                   label_visibility="collapsed", format="YYYY/MM/DD")
 
     c1, c2, c3 = st.columns([3, 2, 2])
