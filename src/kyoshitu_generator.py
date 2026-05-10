@@ -37,13 +37,15 @@ def generate_kyoshitu(
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
 
-    current = start_date
-    while current <= end_date:
+    start = date(int(start_date.year), int(start_date.month), int(start_date.day))
+    end   = date(int(end_date.year),   int(end_date.month),   int(end_date.day))
+    days_count = (end - start).days + 1
+    for i in range(days_count):
+        current = start + timedelta(days=i)
         wd = WEEKDAY_JP[current.weekday()]
         ws = wb.create_sheet(title=f"{current.month}/{current.day}({wd})")
         _write_sheet(ws, current, wd, floor_rooms, slots_order, schedule,
                      current.year, current.month, current.day)
-        current += timedelta(days=1)
 
     label = f"{start_date.strftime('%Y.%m.%d')}-{end_date.strftime('%m.%d')}"
     filename = f"教室案内表_{label}.xlsx"
