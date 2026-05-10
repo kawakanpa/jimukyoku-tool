@@ -170,7 +170,7 @@ def _check_password() -> bool:
     if st.session_state.get("authenticated"):
         return True
 
-    st.title("事務局ツール")
+    st.title("鳥観図・教室案内表作成ツール")
     pw = st.text_input("パスワード", type="password", placeholder="パスワードを入力してください")
     if st.button("ログイン", type="primary"):
         if pw == required:
@@ -182,12 +182,12 @@ def _check_password() -> bool:
 
 
 def main():
-    st.set_page_config(page_title="事務局ツール", layout="wide")
+    st.set_page_config(page_title="鳥観図・教室案内表作成ツール", layout="wide")
 
     if not _check_password():
         st.stop()
 
-    st.title("事務局ツール　スケジュール自動生成")
+    st.title("鳥観図・教室案内表作成ツール")
 
     settings = load_settings(CONFIG_DIR)
 
