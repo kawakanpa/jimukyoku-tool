@@ -1,0 +1,19 @@
+# パスワード設定（絶対にGitHubに上げない）
+.streamlit/secrets.toml
+
+# データフォルダ（個人情報・スケジュール情報）
+data/input/
+data/output/
+data/backup/
+logs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db

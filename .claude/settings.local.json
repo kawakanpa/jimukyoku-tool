@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import zipfile; z = zipfile.ZipFile\\(r'C:\\\\Users\\\\kawak\\\\Downloads\\\\YahooJapanMail_2026_05_10.zip'\\); print\\('\\\\n'.join\\(z.namelist\\(\\)\\)\\)\")"
+    ]
+  }
+}
